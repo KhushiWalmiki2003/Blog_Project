@@ -1,10 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-  const { currentUser, logout } = useAuth();
+  const { user, logout, token } = useAuth();
+  const navigate = useNavigate();
 
-  const isAuthenticated = !!currentUser;
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <nav className="flex justify-between items-center px-6 py-3 bg-gray-800 text-white">
@@ -17,19 +21,23 @@ export default function Navbar() {
           All Posts
         </Link>
 
-        {isAuthenticated ? (
+        {token ? (
           <>
             <span className="opacity-80">
-              Hi, {currentUser?.name || `User#${currentUser?.id}`}
+              Hi, {user?.name || user?.username || "User"}
             </span>
 
-            <Link to="/create-post" className="hover:text-yellow-400">
+            <Link
+              to="/create-post"
+              className="hover:text-yellow-400"
+            >
               Create Post
             </Link>
 
             <button
-              onClick={logout}
-              className="bg-red-500 px-3 py-1 rounded text-white"
+              type="button"
+              onClick={handleLogout}
+              className="inline-block bg-red-500 px-4 py-2 rounded text-white hover:bg-red-600 cursor-pointer"
             >
               Logout
             </button>

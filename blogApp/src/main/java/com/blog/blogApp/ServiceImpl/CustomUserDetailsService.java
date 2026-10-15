@@ -15,12 +15,20 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UserRepo userRepo;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user =userRepo.findByName(username).orElseThrow(()->new IllegalArgumentException("Username is not Found"+username));
-        return new org.springframework
-                .security.
-                core.
-                userdetails.
-                User(user.getName(),user.getPassword(), Collections.emptyList());
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
+
+        User user = userRepo.findByName(username)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "User not found: " + username
+                        )
+                );
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getName(),
+                user.getPassword(),
+                Collections.emptyList()
+        );
     }
 }

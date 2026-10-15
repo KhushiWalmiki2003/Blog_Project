@@ -1,4 +1,5 @@
 package com.blog.blogApp.security;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,43 +32,46 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        final String header = request.getHeader("Authorization");
+        String header = request.getHeader("Authorization");
 
-        String token = null;
-        String userName = null;
-
-        if (header != null && header.startsWith("Bearer ")) {
-            token = header.substring(7);
-
-            try {
-                userName = util.getUserNameFromToken(token);
-            } catch (Exception e) {
-                // Invalid or expired token.
-                // Continue the filter chain without authentication.
-            }
+        // If no JWT is provided, continue without authentication.
+        if (header == null || !header.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        if (userName != null
-                && SecurityContextHolder.getContext().getAuthentication() == null
-                && util.validateToken(token)) {
+        String token = header.substring(7);
 
-            UserDetails details =
-                    userDetailsService.loadUserByUsername(userName);
+        try {
+            String userName = util.extractUsername(token);
 
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(
-                            details,
-                            null,
-                            details.getAuthorities()
-                    );
+            if (userName != null
+                    && SecurityContextHolder.getContext()
+                    .getAuthentication() == null
+                    && util.validateToken(token)) {
 
-            authenticationToken.setDetails(
-                    new WebAuthenticationDetailsSource()
-                            .buildDetails(request)
-            );
+                UserDetails details =
+                        userDetailsService.loadUserByUsername(userName);
 
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authenticationToken);
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(
+                                details,
+                                null,
+                                details.getAuthorities()
+                        );
+
+                authenticationToken.setDetails(
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request)
+                );
+
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authenticationToken);
+            }
+
+        } catch (Exception e) {
+            // Invalid or expired JWT: do not authenticate this request.
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

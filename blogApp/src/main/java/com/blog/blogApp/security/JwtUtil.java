@@ -1,53 +1,45 @@
-
 package com.blog.blogApp.security;
-import io.jsonwebtoken.JwtException;
-import java.security.SignatureException;
-import io.jsonwebtoken.*;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
-@Data
 public class JwtUtil {
 
     @Value("${jwt.secret}")
-    private String jwtSecret;
-
-    @Value("${jwt.expiration-ms}")
-    private Long jwtExpiration;
+    private String secret;
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(
-                jwtSecret.getBytes(StandardCharsets.UTF_8)
-        );
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String userName) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + jwtExpiration);
+    public String generateToken(String username) {
+        long expirationTime = 1000L * 60 * 60; // 1 hour
 
         return Jwts.builder()
-                .subject(userName)
-                .issuedAt(now)
-                .expiration(expiry)
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date(
+                        System.currentTimeMillis() + expirationTime
+                ))
                 .signWith(getSigningKey(), Jwts.SIG.HS512)
                 .compact();
     }
 
-    public String getUserNameFromToken(String token) {
-        Claims claims = Jwts.parser()
+    public String extractUsername(String token) {
+        return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
-                .getPayload();
-
-        return claims.getSubject();
+                .getPayload()
+                .getSubject();
     }
 
     public boolean validateToken(String token) {
@@ -56,12 +48,11 @@ public class JwtUtil {
                     .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token);
-
             return true;
-
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (Exception e) {
             return false;
         }
     }
+
 
 }
