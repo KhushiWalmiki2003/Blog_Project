@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { attachTokenToApi } from "../api/axiosconfig";
 import { loginApi } from "../api/Auth";
@@ -27,7 +28,11 @@ export default function AuthProvider({ children }) {
   const login = async (userName, password) => {
     try {
       const res = await loginApi(userName, password);
-      const { token: jwt, user: userDto } = res.data;
+
+      console.log("Login response:", res.data);
+
+      // Match your Java JwtAuthResponse fields
+      const { token: jwt, userDto } = res.data;
 
       if (!jwt) {
         return {
@@ -36,10 +41,10 @@ export default function AuthProvider({ children }) {
         };
       }
 
-      setUser(userDto || null);
       setToken(jwt);
-
       localStorage.setItem("token", jwt);
+
+      setUser(userDto || null);
 
       if (userDto) {
         localStorage.setItem("user", JSON.stringify(userDto));
@@ -49,6 +54,8 @@ export default function AuthProvider({ children }) {
 
       return { success: true };
     } catch (err) {
+      console.error("Login error:", err.response?.data || err.message);
+
       return {
         success: false,
         message: err.response?.data?.message || "Login Failed",

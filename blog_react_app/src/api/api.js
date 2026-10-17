@@ -15,3 +15,8 @@ export const api2=axios.create(
   baseURL: "http://localhost:8061/api/auth",
   }
 )
+export const api3 =axios.create(
+  {
+    baseURL:"http://localhost:8061/api/comments",
+  }
+)
