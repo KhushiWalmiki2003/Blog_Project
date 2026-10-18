@@ -6,6 +6,7 @@ import com.blog.blogApp.Service.CommentService;
 import com.blog.blogApp.Repository.UserRepo;
 import com.blog.blogApp.entity.User;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,7 @@ public class CommentController {
 
     @PostMapping("/{postId}")
     public ResponseEntity<?> addComment(
+            @Valid
             @PathVariable Integer postId,
             @RequestBody CommentDto commentDto,
             @AuthenticationPrincipal UserDetails userDetails) {

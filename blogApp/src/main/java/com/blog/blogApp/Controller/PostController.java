@@ -1,6 +1,7 @@
 package com.blog.blogApp.Controller;
 import com.blog.blogApp.Payloads.PostDto;
 import com.blog.blogApp.Service.PostService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,13 +16,13 @@ public class PostController {
     PostService postService;
 
     @PostMapping("/user/{userId}/category/{categoryId}")
-    public ResponseEntity<PostDto> createPost(@RequestBody  PostDto postDto, @PathVariable Integer userId,@PathVariable Integer categoryId){
+    public ResponseEntity<PostDto> createPost(@Valid @RequestBody  PostDto postDto, @PathVariable Integer userId, @PathVariable Integer categoryId){
          PostDto createdpost=this.postService.createPost(postDto,userId,categoryId);
          return  new ResponseEntity<>(createdpost, HttpStatus.CREATED);
     }
 
     @PutMapping("/{postId}")
-    public  ResponseEntity<PostDto> updatePost(@RequestBody PostDto postDto,@PathVariable Integer postId){
+    public  ResponseEntity<PostDto> updatePost(@Valid @RequestBody PostDto postDto,@PathVariable Integer postId){
      PostDto updated=this.postService.updatePost(postDto,postId);
      return ResponseEntity.ok(updated);
     }

@@ -1,33 +1,60 @@
-import { useEffect, useState } from "react";
-import { getPosts } from "../api/PostApi";
 
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { getPosts } from "../api/PostApi";
 
 export default function PostList() {
   const [posts, setPosts] = useState([]);
+
   useEffect(() => {
-     loadPosts(); 
-    }, []);
+    loadPosts();
+  }, []);
+
   const loadPosts = async () => {
     try {
       const res = await getPosts();
-      console.log("API Response ===>",res.data);
+      console.log("API Response ===>", res.data);
       setPosts(res.data);
     } catch (err) {
-      console.log(err);
+      console.error("Error loading posts:", err);
     }
   };
+
   return (
     <div className="mt-6">
-      <h2 className="text-xl font-bold mb-4">All Posts</h2>
+      <h2 className="mb-4 text-xl font-bold">All Posts</h2>
+
       <div className="space-y-4">
         {posts.map((p) => (
-          <div className="p-4 border rounded bg-grey-50 " key={p.postId}>
-            <h3 className="text-lg font-semibold">{p.title}</h3>
-            <p className="text-grey-700">{p.content}</p>
-            <span className="text-sm text-grey-500">Category:{p.category?.name || "N/A"}</span>
+          <div
+            className="rounded border bg-gray-50 p-4"
+            key={p.postId}
+          >
+            <Link to={`/posts/${p.postId}`}>
+              <h3 className="text-lg font-semibold text-blue-600 hover:underline">
+                {p.title}
+              </h3>
+            </Link>
+
+            <p className="mt-2 text-gray-700">
+              {p.content?.length > 150
+                ? `${p.content.substring(0, 150)}...`
+                : p.content}
+            </p>
+
+            <p className="mt-2 text-sm text-gray-500">
+              Category: {p.categoryDto?.categoryTitle || "N/A"}
+            </p>
+
+            <Link
+              to={`/posts/${p.postId}`}
+              className="mt-3 inline-block text-blue-600 hover:underline"
+            >
+              Read Full Post →
+            </Link>
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }

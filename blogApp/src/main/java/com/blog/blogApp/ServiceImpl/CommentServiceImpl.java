@@ -35,13 +35,28 @@ public class CommentServiceImpl implements CommentService {
         comment.setParentComment(parent);
     }
   Comment saved=commentRepo.save(comment);
+    CommentDto  responsedto=modelMapper.map(saved,CommentDto.class);
+    responsedto.setUserID(saved.getUser().getId());
+    responsedto.setUserName(saved.getUser().getName());
+    responsedto.setPostId(saved.getPost().getPostId());
+    if (saved.getParentComment() !=null){
+        responsedto.setParentCommentId(saved.getParentComment().getId());
+    }
+    return responsedto;
 
-    return modelMapper.map(saved,CommentDto.class);
     }
 
     @Override
     public List<CommentDto> getCommentByPostId(Integer postId) {
         List<Comment> comments=commentRepo.findByPostPostId(postId);
-        return comments.stream().map(c->modelMapper.map(c,CommentDto.class)).collect(Collectors.toList());
+        return comments.stream().map(c->{ CommentDto dto=modelMapper.map(c,CommentDto.class);
+            dto.setUserID(c.getUser().getId());
+            dto.setUserName(c.getUser().getName());
+            dto.setPostId(c.getPost().getPostId());
+            if(c.getParentComment() != null){
+                dto.setParentCommentId(c.getParentComment().getId());
+            }
+            return dto;
+        }).collect(Collectors.toList());
     }
 }

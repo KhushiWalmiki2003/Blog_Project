@@ -2,9 +2,9 @@
 package com.blog.blogApp.security;
 
 import com.blog.blogApp.ServiceImpl.CustomUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,24 +16,27 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomUserDetailsService detailsService;
 
-    @Autowired
-    private CustomUserDetailsService detailsService;
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            CustomUserDetailsService detailsService) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.detailsService = detailsService;
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(
             HttpSecurity httpSecurity,
-            BCryptPasswordEncoder bCryptPasswordEncoder) throws Exception {
+            BCryptPasswordEncoder passwordEncoder) throws Exception {
 
         AuthenticationManagerBuilder authBuilder =
                 httpSecurity.getSharedObject(
-                        AuthenticationManagerBuilder.class
-                );
+                        AuthenticationManagerBuilder.class);
 
         authBuilder.userDetailsService(detailsService)
-                .passwordEncoder(bCryptPasswordEncoder);
+                .passwordEncoder(passwordEncoder);
 
         return authBuilder.build();
     }
@@ -52,26 +55,28 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
-                )
+                                SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/user/**"
                         ).permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/comments/**"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/h2-console/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
+                )
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
+                .headers(headers ->
+                        headers.frameOptions(frame -> frame.disable())
                 );
-
-        httpSecurity.addFilterBefore(
-                jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class
-        );
-
-        httpSecurity.headers(header ->
-                header.frameOptions(frame -> frame.disable())
-        );
 
         return httpSecurity.build();
     }

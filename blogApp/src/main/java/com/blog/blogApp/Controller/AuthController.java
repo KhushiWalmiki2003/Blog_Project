@@ -5,6 +5,7 @@ import com.blog.blogApp.Payloads.UserDto;
 import com.blog.blogApp.Service.UserService;
 import com.blog.blogApp.ServiceImpl.CustomUserDetailsService;
 import com.blog.blogApp.security.JwtUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class AuthController {
     @Autowired
     private JwtUtil util;
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request){
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request){
         try{
            Authentication auth =authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUserName(),request.getPassword()));
 
