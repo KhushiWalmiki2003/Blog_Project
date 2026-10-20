@@ -46,6 +46,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+
     @Bean
     public SecurityFilterChain filterChain(
             HttpSecurity httpSecurity) throws Exception {
@@ -56,28 +57,32 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/user/**"
                         ).permitAll()
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/comments/**"
-                        ).permitAll()
-                        .requestMatchers(
-                                "/h2-console/**"
-                        ).permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**")
+                        .permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/comments/**")
+                        .permitAll()
+
+                        .requestMatchers("/h2-console/**")
+                        .permitAll()
+
                         .anyRequest().authenticated()
                 )
+
+                // IMPORTANT: Register your JWT filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
-                )
-                .headers(headers ->
-                        headers.frameOptions(frame -> frame.disable())
                 );
 
         return httpSecurity.build();
     }
+
 }
