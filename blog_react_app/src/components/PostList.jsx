@@ -8,6 +8,7 @@ const PAGE_SIZE = 5;
 export default function PostList() {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     loadPosts();
@@ -23,9 +24,24 @@ export default function PostList() {
     }
   };
 
-  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+  // Search in title, content and category
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? posts.filter((p) =>
+        [p.title, p.content, p.categoryDto?.categoryTitle]
+          .filter(Boolean)
+          .some((text) => text.toLowerCase().includes(q))
+      )
+    : posts;
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
-  const visible = posts.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+  const visible = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+
+  const handleSearch = (e) => {
+    setQuery(e.target.value);
+    setPage(1);
+  };
 
   const goToPage = (n) => {
     setPage(n);
@@ -36,7 +52,30 @@ export default function PostList() {
     <div className="mt-6">
       <h2 className="mb-4 text-xl font-bold">All Posts</h2>
 
-      <div className="space-y-4">
+      <div className="relative mb-2">
+        <input
+          type="search"
+          value={query}
+          onChange={handleSearch}
+          placeholder="Search by title, content or category"
+          className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+
+      {q && (
+        <p className="mb-4 text-sm text-gray-500">
+          {filtered.length} {filtered.length === 1 ? "result" : "results"} for “{query.trim()}”
+          <button
+            type="button"
+            onClick={() => { setQuery(""); setPage(1); }}
+            className="ml-3 text-blue-600 hover:underline"
+          >
+            Clear search
+          </button>
+        </p>
+      )}
+
+      <div className="mt-4 space-y-4">
         {visible.map((p) => (
           <div
             className="rounded border bg-gray-50 p-4"
@@ -66,13 +105,19 @@ export default function PostList() {
             </Link>
           </div>
         ))}
+
+        {posts.length > 0 && filtered.length === 0 && (
+          <p className="rounded border border-dashed p-6 text-center text-gray-500">
+            No posts match your search.
+          </p>
+        )}
       </div>
 
       <Pagination
         page={current}
         totalPages={totalPages}
         onPageChange={goToPage}
-        totalItems={posts.length}
+        totalItems={filtered.length}
         pageSize={PAGE_SIZE}
       />
     </div>
