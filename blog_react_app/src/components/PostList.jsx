@@ -1,10 +1,13 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getPosts } from "../api/PostApi";
+import Pagination from "./Pagination";
+
+const PAGE_SIZE = 5;
 
 export default function PostList() {
   const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     loadPosts();
@@ -20,12 +23,21 @@ export default function PostList() {
     }
   };
 
+  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+  const current = Math.min(page, totalPages);
+  const visible = posts.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+
+  const goToPage = (n) => {
+    setPage(n);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="mt-6">
       <h2 className="mb-4 text-xl font-bold">All Posts</h2>
 
       <div className="space-y-4">
-        {posts.map((p) => (
+        {visible.map((p) => (
           <div
             className="rounded border bg-gray-50 p-4"
             key={p.postId}
@@ -55,6 +67,14 @@ export default function PostList() {
           </div>
         ))}
       </div>
+
+      <Pagination
+        page={current}
+        totalPages={totalPages}
+        onPageChange={goToPage}
+        totalItems={posts.length}
+        pageSize={PAGE_SIZE}
+      />
     </div>
   );
 }
