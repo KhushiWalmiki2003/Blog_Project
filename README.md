@@ -137,4 +137,4 @@ Add a license for your project (for example MIT) in a `LICENSE` file.
 
 ## Author
 
-Made by **<KhushiWalmiki2003>**. Find me on [GitHub](https://github.com/<KhushiWalmiki2003>).
+Made by **<KhushiWalmiki2003>**. Find me on [GitHub](https://github.com/KhushiWalmiki2003).
