@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import UserForm from "../components/userForm";
+import UserForm from "../components/UserForm";
 import UserList from "../components/UserList";
 export default function Home(){
   const[reload,setReload]=useState(false);
