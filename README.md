@@ -44,7 +44,7 @@ A full-featured blog frontend built with **React 19**, **Vite** and **Tailwind C
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/<KhushiWalmiki2003>/<Blog_Project>.git
+git clone https://github.com/<your-username>/<your-repo>.git
 
 # 2. Go into the project folder
 cd blog_react_app
@@ -137,4 +137,4 @@ Add a license for your project (for example MIT) in a `LICENSE` file.
 
 ## Author
 
-Made by **<https://github.com/KhushiWalmiki2003>**. Find me on [GitHub](https://github.com/KhushiWalmiki2003).
+Made by **<Khushi Walmiki>**. Find me on [GitHub](https://github.com/KhushiWalmiki2003).
